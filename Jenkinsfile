@@ -1,39 +1,52 @@
 pipeline {
     agent any
-    tools { maven 'Maven' } // Jenkins tool name
+
+    environment {
+        // If you have Maven installed via Jenkins global tools
+        MAVEN_HOME = tool name: 'Maven_3.9', type: 'maven'
+        PATH = "${env.MAVEN_HOME}/bin;${env.PATH}"
+
+        // Use system Node and Python
+        NODE_HOME = "C:\\Program Files\\nodejs"
+        PATH = "${env.NODE_HOME};${env.PATH}"
+
+        PYTHON_HOME = "C:\\Python313"
+        PATH = "${env.PYTHON_HOME};${env.PATH}"
+    }
+
     stages {
         stage('Checkout') {
-            steps { 
-                git url: 'git@github.com:harmannoor2002/blueocean-plugin.git', 
-                    credentialsId: 'github-ssh', branch: 'master' 
+            steps {
+                checkout scm
             }
         }
-        
+
         stage('Build') {
             steps {
                 script {
-                    // Set Maven path
-                    def mvnHome = tool 'Maven'
-                    env.PATH = "${mvnHome}\\bin;${env.PATH}"
-                }
-                // Set Python path and run Maven build
-                withEnv(['PYTHON=C:\\Python313\\python.exe']) {
+                    // Clean old node_modules just in case
+                    bat 'rmdir /s /q jenkins-design-language\\node_modules || echo Node modules not found'
+                    bat 'npm cache clean --force'
+
+                    // Build with Maven, skip tests
                     bat 'mvn -B -DskipTests clean package'
                 }
             }
         }
-        
+
         stage('Deploy') {
             steps {
-                bat 'if not exist C:\\deploy mkdir C:\\deploy'
-                bat 'copy /Y target\\*.war C:\\deploy\\'
+                echo "Skipping deploy since this is just a CI build."
             }
         }
     }
-    
+
     post {
-        always { 
-            echo "Finished build ${currentBuild.fullDisplayName}" 
+        always {
+            echo "Finished Jenkins build"
+        }
+        failure {
+            echo "Build failed. Check logs for errors."
         }
     }
 }
