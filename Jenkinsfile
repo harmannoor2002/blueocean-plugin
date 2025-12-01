@@ -18,10 +18,7 @@ properties([
   buildDiscarder(logRotator(artifactNumToKeepStr: '20', numToKeepStr: '20')),
 ])
 
-credentials = [
-  file(credentialsId: 'blueoceandeploy_ath', variable: 'LIVE_PROPERTIES_FILE'),
-  file(credentialsId: 'blueocean-ath-private-repo-key', variable: 'BO_ATH_KEY_FILE')
-]
+
 
 envs = [
   'GIT_COMMITTER_EMAIL=me@hatescake.com',
@@ -33,9 +30,9 @@ envs = [
 jenkinsVersions = ['2.401.3']
 
 node() {
-  withCredentials(credentials) {
-    withEnv(envs) {
-
+  // withCredentials(credentials) {
+    //withEnv(envs) {
+/*
       stage('Setup') {
         deleteDir()
         checkout scm
@@ -103,7 +100,8 @@ node() {
           }
         }
       }
-    }
-  }
+  */
+    } //
+  } //
 }
 
