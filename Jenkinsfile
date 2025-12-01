@@ -5,7 +5,15 @@ pipeline {
     stage('Checkout') {
       steps { git url: 'git@github.com:harmannoor2002/blueocean-plugin.git', credentialsId: 'github-ssh', branch: 'master' }
     }
-    stage('Build') { steps { bat 'mvn -B -DskipTests clean package' } }
+stage('Build') {
+    steps {
+        tool 'Maven'  // Keep your existing Maven tool
+        envVarsForTool
+        withEnv(['PYTHON=C:\\Python313\\python.exe']) {  // Add this line to set Python path
+            bat 'mvn -B -DskipTests clean package'
+        }
+    }
+}
     stage('Deploy') { steps { bat 'if not exist C:\\deploy mkdir C:\\deploy' ; bat 'copy /Y target\\*.war C:\\deploy\\' } }
   }
   post { always { echo "Finished build ${currentBuild.fullDisplayName}" } }
