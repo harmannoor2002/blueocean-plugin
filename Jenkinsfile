@@ -1,52 +1,21 @@
 pipeline {
     agent any
-
-    environment {
-        // If you have Maven installed via Jenkins global tools
-        MAVEN_HOME = tool name: 'Maven_3.9', type: 'maven'
-        PATH = "${env.MAVEN_HOME}/bin;${env.PATH}"
-
-        // Use system Node and Python
-        NODE_HOME = "C:\\Program Files\\nodejs"
-        PATH = "${env.NODE_HOME};${env.PATH}"
-
-        PYTHON_HOME = "C:\\Python313"
-        PATH = "${env.PYTHON_HOME};${env.PATH}"
+    tools {
+        nodejs 'NodeJS_24'       // Replace with your NodeJS installation name in Jenkins
+        python 'Python_3.13'     // Replace with your Python installation name in Jenkins
+        maven 'Maven_3.9'        // Replace with your Maven installation name in Jenkins
     }
-
+    environment {
+        PATH = "${tool 'NodeJS_24'}/bin:${tool 'Python_3.13'}/bin:${tool 'Maven_3.9'}/bin:${env.PATH}"
+    }
     stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-
         stage('Build') {
             steps {
-                script {
-                    // Clean old node_modules just in case
-                    bat 'rmdir /s /q jenkins-design-language\\node_modules || echo Node modules not found'
-                    bat 'npm cache clean --force'
-
-                    // Build with Maven, skip tests
-                    bat 'mvn -B -DskipTests clean package'
-                }
+                echo "PATH is ${env.PATH}"
+                sh 'node -v'
+                sh 'python --version'
+                sh 'mvn -v'
             }
-        }
-
-        stage('Deploy') {
-            steps {
-                echo "Skipping deploy since this is just a CI build."
-            }
-        }
-    }
-
-    post {
-        always {
-            echo "Finished Jenkins build"
-        }
-        failure {
-            echo "Build failed. Check logs for errors."
         }
     }
 }
